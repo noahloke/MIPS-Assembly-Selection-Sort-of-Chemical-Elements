@@ -7,29 +7,30 @@
 #
 	.data
 ptfname:	.asciiz	"C:/Users/admin/Documents/CS/enames.dat"
-title:	.asciiz	"Elements v0.2 by N. Loke\n\n"
+title:		.asciiz	"Elements v0.2 by N. Loke\n\n"
 elements:	.asciiz	" elements\n\n"
 
-head:	.word	0
-input:	.space	64
+head:		.word	0
+input:		.space	64
 
 fileDesc:	.word	0
 numElem:	.word	0
-array:	.word	0
+array:		.word	0
  
 	.text
 main:	la	$a0, title		# print "Elements v0.2 by N. Loke\n\n"
 	li	$v0, 4
 	syscall
 
-	la	$a0, ptfname	# open file
+	la	$a0, ptfname		# open file
 	jal	open
-	sw	$v0, fileDesc	# Save file descriptor
-	lw	$s0, numElem	# load/set element counter to 0
+	sw	$v0, fileDesc		# Save file descriptor
+	lw	$s0, numElem		# load/set element counter to 0
 
-readFile:	lw	$a0, fileDesc	# Load file descriptor
+readFile:	
+	lw	$a0, fileDesc		# Load file descriptor
 	la	$a1, input		# Load buffer address
-	jal	fgetln		# Read a line into buffer
+	jal	fgetln			# Read a line into buffer
 
 	la	$a0, input
 
@@ -40,53 +41,56 @@ readFile:	lw	$a0, fileDesc	# Load file descriptor
 	move	$a0, $v0		# move dup string address to $a0
 
 	lw	$a1, head		# Load current head as the next node
-	jal	getnode		# Create a new node and link it
+	jal	getnode			# Create a new node and link it
 	sw	$v0, head		# Update head with the new node address
 
-	add	$s0, 1		# increment element counter
+	add	$s0, 1			# increment element counter
 	b	readFile
 
-endOfFile:	lw	$a0, fileDesc	# Load file descriptor
+endOfFile:	
+	lw	$a0, fileDesc		# Load file descriptor
 	jal	close
 
-	sw	$s0, numElem	# print total element count
+	sw	$s0, numElem		# print total element count
 	move	$a0, $s0
 	li	$v0, 1
 	syscall
 
-	la	$a0, elements	# print " elements\n\n"
+	la	$a0, elements		# print " elements\n\n"
 	li	$v0, 4
 	syscall
 
 	lw	$a0, head		# Load the head of the list into $a0
-	lw	$a1, numElem	# Load the number of elements
-	jal	toarray		# Call toarray, returns address of the array in $v0
+	lw	$a1, numElem		# Load the number of elements
+	jal	toarray			# Call toarray, returns address of the array in $v0
 
 	sw	$v0, array
 
 	lw	$a0, array		# Move base address of the array to $a0
-	lw	$a1, numElem	# Load the number of elements
-	jal	sort		# Call sort
+	lw	$a1, numElem		# Load the number of elements
+	jal	sort			# Call sort
 
 	lw	$t0, array		# Move base address of the array to $t0
 
-	lw	$t1, numElem	# Load the number of elements
+	lw	$t1, numElem		# Load the number of elements
 
-	li	$t2, 0		# Index for the loop
-print_loop:	beq	$t2, $t1, exit	# End loop if index equals number of elements
+	li	$t2, 0			# Index for the loop
+print_loop:	
+	beq	$t2, $t1, exit		# End loop if index equals number of elements
 
 	lw	$a0, 0($t0)		# Load address of the current string
 	li	$v0, 4
-	syscall			# Print the string
+	syscall				# Print the string
 
 	addiu	$t0, $t0, 4		# Move to the next element in the array
 	addiu	$t2, $t2, 1		# Increment the index
 	b	print_loop
 
-exit:	li	$v0, 10		# exit
+exit:	li	$v0, 10			# exit
 	syscall
 
-toarray:	subu	$sp, $sp, 12
+toarray:	
+	subu	$sp, $sp, 12
 	sw	$ra, 8($sp)
 	sw	$a1, 4($sp)		# Save size
 	sw	$a0, 0($sp)		# Save head address
@@ -121,21 +125,21 @@ strcmp:
 strcmp_loop:
 	lb	$t3, ($t0)		# Load byte from first string
 	lb	$t4, ($t1)		# Load byte from second string
-	beqz	$t3, strcmp_end	# If end of first string, we're done
+	beqz	$t3, strcmp_end		# If end of first string, we're done
 	bne	$t3, $t4, strcmp_end	# If chars differ, return difference
 	addiu	$t0, $t0, 1		# Move to next character in first string
 	addiu	$t1, $t1, 1		# Move to next character in second string
 	b	strcmp_loop		# Continue loop
 
 strcmp_end:
-	subu	$v0, $t3, $t4	# Return difference if end of second string
+	subu	$v0, $t3, $t4		# Return difference if end of second string
 	jr	$ra
 
 sort:	subu	$sp, $sp, 12
 	sw	$ra, 0($sp)
 	sw	$a0, 4($sp)
 	sw	$a1, 8($sp)
-	li	$s0, 0		# startScan = 0
+	li	$s0, 0			# startScan = 0
 
 sort_outer_loop:	
 	sub	$t0, $a1, 1
@@ -167,7 +171,7 @@ sort_inner_loop:			# end inner loop if index >= array.length
 sort_end_if:	
 	lw	$a0, 4($sp)
 	lw	$a1, 8($sp)
-	add	$s3, 1		# index++
+	add	$s3, 1			# index++
 	b	sort_inner_loop
 
 sort_end_inner:	
@@ -186,7 +190,7 @@ sort_end_inner:
 	sw	$s2, ($a0)
 	lw	$a0, 4($sp)
 
-	add	$s0, 1		# startScan++
+	add	$s0, 1			# startScan++
 	b	sort_outer_loop
 
 sort_end:	
@@ -196,13 +200,14 @@ sort_end:
 	addiu	$sp, $sp, 12
 	jr	$ra
 
-getnode:	subu	$sp, $sp, 12
+getnode:	
+	subu	$sp, $sp, 12
 	sw	$ra, 8($sp)
 	sw	$a0, 4($sp)
 	sw	$a1, 0($sp)
 
-	li	$a0, 8		# Size for new node (2 words)
-	jal	malloc		# Allocate memory for new node
+	li	$a0, 8			# Size for new node (2 words)
+	jal	malloc			# Allocate memory for new node
 	move	$t0, $v0		# $t0 now points to the new node
 
 	lw	$a0, 4($sp)		# Restore the data argument
